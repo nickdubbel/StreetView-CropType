@@ -14,12 +14,12 @@ import streetview
 import math
 
 
-KEY = "AIzaSyAnlocbBH-Bj4EozEywuOqAcvRtb0IS7mw"
+KEY = ""
 key = "&key=" + KEY
 
 
 LANDCOVER_FILENAME = (
-    "test2.csv"
+    "test.csv"
 )
 
 
