@@ -19,7 +19,7 @@ overpass_url = "http://overpass-api.de/api/interpreter"
 overpass_query = """
 [out:json];
 way
-  (14.717189,101.615757,14.897189,101.795757);
+  (51.973055,4.314963,52.034813,4.399928);
 out geom;
 """
 #20 * 20 km
