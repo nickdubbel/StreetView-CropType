@@ -14,7 +14,7 @@ import streetview
 import math
 
 
-KEY = ""
+KEY = "AIzaSyAnlocbBH-Bj4EozEywuOqAcvRtb0IS7mw"
 key = "&key=" + KEY
 
 
@@ -52,11 +52,11 @@ def checkInGrowing(date):
         return False
 
 
-def getStreet(lat, lon, SaveLoc, bearing, meta):
+def getStreet(lat, lon, SaveLoc, bearing, meta,idx):
 
     # heading indicates the compass heading of the camera. Accepted values are from 0 to 360 (both values indicating North, with 90 indicating East, and 180 South),
     # fov (default is 90) determines the horizontal field of view of the image. The field of view is expressed in degrees, with a maximum allowed value of 120
-    heading1 = (bearing -90) 
+    heading1 = (bearing ) 
     # heading2 = (bearing + 270) % 360
     # heading1 = bearing
     # heading2 = (bearing + 180) % 360
@@ -66,12 +66,12 @@ def getStreet(lat, lon, SaveLoc, bearing, meta):
         + str(lat)
         + ","
         + str(lon)
-        + "&fov=120&heading="
-        + str(heading1)
+        + "&fov=90&heading="
+        + str((heading1))
         + "&pitch=0"
         + key
     )
-    fi = meta + str(heading1) + ".jpg"
+    fi = str(idx)+"_"+ str(lat)+ str(lon) + str(heading1) + ".jpg"
     urllib.request.urlretrieve(MyUrl, os.path.join(SaveLoc, fi))
     # MyUrl = "https://maps.googleapis.com/maps/api/streetview?size=640x640&location="+str(lat)+","+str(lon)+"&fov=80&heading="+str(heading2)+"&pitch=0&key=AIzaSyDg_suLgCZ9BrfSPRxMrekQEhDsCdk6mjE"
     # fi = meta +str(heading2)+ ".jpg"
@@ -181,14 +181,14 @@ def getMeta(points, myloc, imLimit=0):
                         # print("Distance (m) ", distance)
                         uniqueImageIDs.append(resJson["pano_id"])
                         meta = resJson["date"] + resJson["pano_id"]
-                        getStreet(lat, lon, myloc, bearing, meta)
+                        getStreet(lat, lon, myloc, bearing, meta,idx)
 
                         # bearing = computeBearing(fro, pt2)
                         # distance = computeDistance(fro, pt2)
                         # print("Distance (m) ", distance)
-                        uniqueImageIDs.append(resJson["pano_id"])
-                        meta = resJson["date"] + resJson["pano_id"]
-                        getStreet(lat, lon, myloc, bearing, meta)
+                        # uniqueImageIDs.append(resJson["pano_id"])
+                        # meta = resJson["date"] + resJson["pano_id"]
+                        # getStreet(lat, lon, myloc, bearing, meta,idx)
         i += 1
 
 

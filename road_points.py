@@ -11,7 +11,7 @@ DISTANCE_DELTA = 0.0001  # used for interpolating points along the road
 PERPENDICULAR_DISTANCE = 3  # distance for calculating field points
 OVERPASS_API_URL = "http://overpass-api.de/api/interpreter"
 SHAPEFILE_PATH = 'TreehealthDataset/bomen.shp'
-
+totaal_list = []
 
 def compute_bearing(from_point, to_point):
     """Calculate the bearing from one geographic point to another."""
@@ -19,6 +19,8 @@ def compute_bearing(from_point, to_point):
     x = math.cos(from_point[0]) * math.sin(to_point[0]) - \
         math.sin(from_point[0]) * math.cos(to_point[0]) * math.cos(to_point[1] - from_point[1])
     θ = math.atan2(y, x)
+    
+
     bearing = (θ * 180 / math.pi + 360) % 360
     return bearing
 
@@ -36,7 +38,7 @@ def compute_point_on_field(from_point, theta, distance):
 
 def process_shapefile(shapefile_path):
     """Process each geometry in the shapefile and save results."""
-    geo_data = geopandas.read_file(shapefile_path,rows=6).to_crs("EPSG:4326")
+    geo_data = geopandas.read_file(shapefile_path,rows=80).to_crs("EPSG:4326")
     # print(geo_data.crs)
     # print(geo_data.keys()) 'WOONPLAATS', 'WIJK', 'BUURT', 'GROENGEBIE', 'GEBIEDCODE', 'ELEMENTNUM',
     #    'BEHEEROBJE', 'BEHEERGROE', 'BOOMSORTIM', 'EXTRA_2', 'BOOMHOOGTE',
@@ -49,6 +51,7 @@ def process_shapefile(shapefile_path):
         print('GEO Index ', geo_idx)
         if geo_idx >= 0:
             process_geometry(geometry, geo_idx)
+    save_to_csv(totaal_list, f"test.csv", "y,x,b,oy,ox")
 
 def process_geometry(geometry, geo_idx):
     """Process a single geometry from the shapefile."""
@@ -74,10 +77,10 @@ def process_geometry(geometry, geo_idx):
             # print(road_data)
 
     else:
-        print("NOT a MULTIPOLYGON")
+        # print("NOT a MULTIPOLYGON")
         geometry = geometry.simplify(tolerance, preserve_topology=True)
         ext_coords = list(geometry.coords)
-        print(geo_idx, ext_coords)
+        # print(geo_idx, ext_coords)
         polygon_query = create_overpass_query(ext_coords)
         road_data = fetch_overpass_data(polygon_query)
         # print(road_data)
@@ -89,7 +92,7 @@ def create_overpass_query(ext_coords):
     coord_str = " ".join(f"{lon}, {lat}" for lat, lon in ext_coords)
     overpass_query = f"""
     [out:json];
-    way(around:25,{coord_str});
+    way(around:30,{coord_str});
     out geom;
     """
     return overpass_query
@@ -101,7 +104,8 @@ def fetch_overpass_data(query):
 
 def process_road_data(road_data, geo_idx,ext_coords):
     """Process road data and save the output to CSV files."""
-    data = []
+    data = [0,0,0,0,0]
+    totat_points = [(0,0)]
     road_points, field_points, original_points = [], [], []
     for element in road_data['elements']:
         if element['type'] == 'way':
@@ -110,19 +114,23 @@ def process_road_data(road_data, geo_idx,ext_coords):
             if  any(keyword in tags for keyword in keywords):
                 try:
                     process_way_element(element, road_points, field_points, original_points)
-                    coords = [ ext_coords[0][1],ext_coords[0][0]]
-                    distance = np.linalg.norm(np.array(original_points)-np.array(coords),axis = 1 )
-                    min_dist = np.argmin(distance)
-                    data = list(original_points[min_dist])
-                    b = compute_bearing(data, coords)
-                    data.append(b)
-                    data.append(coords[0])
-                    data.append(coords[1])
+                    for i in original_points:
+                        totat_points.append(i)
+                   
 
                 except Exception as e:
                     print(e)
 
-    save_to_csv([data], f"test{geo_idx}.csv", "y,x,b,oy,ox")
+    coords = [ ext_coords[0][1],ext_coords[0][0]]
+    distance = np.linalg.norm(np.array(totat_points)-np.array(coords),axis = 1 )
+    min_dist = np.argmin(distance)
+    data = list(totat_points[min_dist])
+    b = compute_bearing(data, coords)
+    data.append(b)
+    data.append(coords[0])
+    data.append(coords[1])
+    totaal_list.append(data)
+    
     # save_to_csv(field_points, f"roadPoints/fieldPointsNW4_{geo_idx}.csv", "y,x,b,yr,xr")
     # save_to_csv(original_points, f"roadPoints/osmRoadsNW4_{geo_idx}.csv", "y,x")
 
@@ -142,7 +150,7 @@ def process_way_element(element, road_points, field_points, original_points):
         # print("Not enough points to form a LineString")
         return
     new_line = LineString(points)
-    process_line_points(new_line, road_points, field_points)
+    # process_line_points(new_line, road_points, field_points)
 
 def process_line_points(line, road_points, field_points):
     """Process points along a line and compute adjacent field points."""
