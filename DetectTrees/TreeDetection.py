@@ -55,6 +55,19 @@ class FindTree:
             black_image[y_min:y_max, x_min:x_max] = image[y_min:y_max, x_min:x_max]
         
         return black_image
+    
+    def RemoveBackground_Show(self, image_location):
+
+        [detections, labels] = self.process(image_location)
+
+        if detections.xyxy is None:
+            print("No tree found")
+            return
+        image = cv2.imread(image_location)
+
+        masked_image = self.RemoveBackground(image, detections)
+
+        cv2.imshow(masked_image)
 
 
     def RemoveBackground_Save(self, image_location, save_location):
