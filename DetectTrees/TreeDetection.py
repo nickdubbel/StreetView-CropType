@@ -1,53 +1,44 @@
-from roboflow import Roboflow
-import supervision as sv
+from ultralytics import YOLO
 import cv2
 import numpy as np
 import os
 import math
+from PIL import Image
 
 class FindTree:
-    def __init__(self, confidence=40, showAllTrees=False) -> None:
-        rf = Roboflow(api_key="VADUz3HxBEISEYIUt6o3")
-        project = rf.workspace().project("tree-detection-ekaot")
-        self.model = project.version(1).model
-        self.confidence = confidence
+    def __init__(self, model, showAllTrees=False) -> None:
+        self.model = model
         self.showAllTrees = showAllTrees
 
     def process(self, image_location):
-        # result = self.model.predict(image_location, confidence=self.confidence).json()
-        result = self.model.predict(image_location, confidence=self.confidence, overlap=30).json()
 
-        labels = [item["class"] for item in result["predictions"]]
+        result = self.model(image_location)
 
-        detections = sv.Detections.from_inference(result)
-
-        return detections, labels
+        #only take first (rest are not trees)
+        result = result[0]
+    
+        return result
 
 
     def process_show(self, image_location):
 
-        [detections, labels] = self.process(image_location)
+        result = self.process(image_location)
+        im_bgr = result.plot()  # BGR-order numpy array
+        im_rgb = Image.fromarray(im_bgr[..., ::-1])  # RGB-order PIL image
+        result.show()
 
-        label_annotator = sv.LabelAnnotator()
-        mask_annotator = sv.MaskAnnotator()
 
-        image = cv2.imread(image_location)
-        annotated_image = mask_annotator.annotate(
-            scene=image, detections=detections)
-        annotated_image = label_annotator.annotate(
-            scene=annotated_image, detections=detections, labels=labels)
-
-        sv.plot_image(image=annotated_image, size=(16, 16))
-
-    def RemoveBackground(self, image, detections):
+    def RemoveBackground(self, image, results):
 
         black_image = np.zeros_like(image)
 
         # only get the first tree
         if not self.showAllTrees:
-            detections.xyxy = [detections.xyxy[0]]
+            xyxy = [results.boxes.xyxy[0]]
+        else:
+            xyxy = results.boxes.xyxy
 
-        for detection in detections.xyxy:
+        for detection in xyxy:
             y_min = int(min(detection[1], detection[3]))
             y_max = int(max(detection[1], detection[3]))
             x_min = int(min(detection[0], detection[2]))
@@ -58,28 +49,28 @@ class FindTree:
     
     def RemoveBackground_Show(self, image_location):
 
-        [detections, labels] = self.process(image_location)
+        results = self.process(image_location)
 
-        if detections.xyxy is None:
+        if len(results.boxes.xyxy) == 0:
             print("No tree found")
             return
         image = cv2.imread(image_location)
 
-        masked_image = self.RemoveBackground(image, detections)
+        masked_image = self.RemoveBackground(image, results)
 
         cv2.imshow(masked_image)
 
 
     def RemoveBackground_Save(self, image_location, save_location):
 
-        [detections, labels] = self.process(image_location)
+        results = self.process(image_location)
 
-        if detections.xyxy is None:
+        if results.boxes.xyxy is None:
             print("No tree found")
             return
         image = cv2.imread(image_location)
 
-        masked_image = self.RemoveBackground(image, detections)
+        masked_image = self.RemoveBackground(image, results)
 
         cv2.imwrite(save_location, masked_image)
 
@@ -90,9 +81,10 @@ if __name__ == "__main__":
 
    
     dataset_input_folder = "Data/DummyData"
-    dataset_output_folder = "Data/DummyData_TreeDetected"
+    dataset_output_folder = "Data/DummyData_TreeDetected2"
 
-    ft = FindTree(confidence=20, showAllTrees=False)
+    model = YOLO("DetectTrees/best.pt")
+    ft = FindTree(model,showAllTrees=True)
 
     # Count total files to count progress only .jpg files
     files = [f for _, _, files in os.walk(dataset_input_folder) for f in files if f.endswith('.jpg')]
@@ -117,10 +109,10 @@ if __name__ == "__main__":
         for filename in os.listdir(photo_folder):
             if filename.endswith(".jpg"):
                 image_path = os.path.join(photo_folder, filename)
-                try:
-                    ft.RemoveBackground_Save(image_path, os.path.join(output_folder, filename))
-                except:
-                    print("Error processing", image_path)
+                # try:
+                ft.RemoveBackground_Save(image_path, os.path.join(output_folder, filename))
+                # except:
+                    # print("Error processing", image_path)
                 processed_files += 1
                 progress = math.ceil((processed_files / total_files) * 100)
                 print(f"Progress: {progress}%")
