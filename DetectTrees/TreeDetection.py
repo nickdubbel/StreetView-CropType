@@ -12,7 +12,7 @@ class FindTree:
 
     def process(self, image_location):
 
-        result = self.model(image_location)
+        result = self.model(image_location, verbose=False)
 
         #only take first (rest are not trees)
         result = result[0]
@@ -51,7 +51,8 @@ class FindTree:
 
         results = self.process(image_location)
 
-        if len(results.boxes.xyxy) == 0:
+        # check if there is at least 1 tree
+        if results.boxes.xyxy == []:
             print("No tree found")
             return
         image = cv2.imread(image_location)
@@ -65,31 +66,57 @@ class FindTree:
 
         results = self.process(image_location)
 
-        if results.boxes.xyxy is None:
-            print("No tree found")
-            return
+        # if results.boxes.xyxy == []:
+        #     print("No tree found")
+        #     return
         image = cv2.imread(image_location)
 
-        masked_image = self.RemoveBackground(image, results)
+        try:
+            masked_image = self.RemoveBackground(image, results)
+            cv2.imwrite(save_location, masked_image)
+        except:
+            print("Error processing", image_location)
+            return
 
-        cv2.imwrite(save_location, masked_image)
 
-
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
 
 # Example usage
 if __name__ == "__main__":
 
    
-    dataset_input_folder = "Data/DummyData"
-    dataset_output_folder = "Data/DummyData_TreeDetected2"
+    dataset_input_folder = "Data/drive-download-20240403T140634Z-001"
+    dataset_output_folder = "Data/drive_processed_singleTree"
 
     model = YOLO("DetectTrees/best.pt")
-    ft = FindTree(model,showAllTrees=True)
+    ft = FindTree(model,showAllTrees=False)
 
     # Count total files to count progress only .jpg files
     files = [f for _, _, files in os.walk(dataset_input_folder) for f in files if f.endswith('.jpg')]
     total_files = sum([len(files)])
     processed_files = 0
+    old_progress = 0
+    printProgressBar(0, total_files, prefix = 'Progress:', suffix = 'Complete', length = 50)
 
     for photo_folder_for in os.listdir(dataset_input_folder):
 
@@ -114,7 +141,11 @@ if __name__ == "__main__":
                 # except:
                     # print("Error processing", image_path)
                 processed_files += 1
-                progress = math.ceil((processed_files / total_files) * 100)
-                print(f"Progress: {progress}%")
+
+                printProgressBar(processed_files, total_files, prefix = 'Progress:', suffix = 'Complete', length = 50)
+                # progress = math.ceil((processed_files / total_files) * 100)
+                # if not (progress == old_progress):
+                #     print(f"Progress: {progress}%")
+                # old_progress = progress
 
     
