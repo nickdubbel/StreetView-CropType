@@ -38,7 +38,11 @@ def compute_point_on_field(from_point, theta, distance):
 
 def process_shapefile(shapefile_path):
     """Process each geometry in the shapefile and save results."""
+<<<<<<< HEAD
     geo_data = geopandas.read_file(shapefile_path).to_crs("EPSG:4326")
+=======
+    geo_data = geopandas.read_file(shapefile_path,rows=80).to_crs("EPSG:4326")
+>>>>>>> 2b81a7924c2b5e4dccb4d063a12a3983687082d7
     # print(geo_data.crs)
     # print(geo_data.keys()) 'WOONPLAATS', 'WIJK', 'BUURT', 'GROENGEBIE', 'GEBIEDCODE', 'ELEMENTNUM',
     #    'BEHEEROBJE', 'BEHEERGROE', 'BOOMSORTIM', 'EXTRA_2', 'BOOMHOOGTE',
@@ -51,8 +55,13 @@ def process_shapefile(shapefile_path):
         print('GEO Index ', geo_idx)
         conditie = geo_data.CONDITIE[geo_idx]
         if geo_idx >= 0:
+<<<<<<< HEAD
             process_geometry(geometry, geo_idx,conditie)
     save_to_csv(totaal_list, f"1200+ .csv", "y,x,b,oy,ox,type")
+=======
+            process_geometry(geometry, geo_idx)
+    save_to_csv(totaal_list, f"test.csv", "y,x,b,oy,ox")
+>>>>>>> 2b81a7924c2b5e4dccb4d063a12a3983687082d7
 
 def process_geometry(geometry, geo_idx,conditie):
     """Process a single geometry from the shapefile."""
@@ -130,7 +139,10 @@ def process_road_data(road_data, geo_idx,ext_coords,conditie):
     data.append(b)
     data.append(coords[0])
     data.append(coords[1])
+<<<<<<< HEAD
     data.append(conditie)
+=======
+>>>>>>> 2b81a7924c2b5e4dccb4d063a12a3983687082d7
     totaal_list.append(data)
     
     # save_to_csv(field_points, f"roadPoints/fieldPointsNW4_{geo_idx}.csv", "y,x,b,yr,xr")
