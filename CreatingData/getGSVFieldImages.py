@@ -14,7 +14,7 @@ import streetview
 import math
 
 
-KEY = "AIzaSyAnlocbBH-Bj4EozEywuOqAcvRtb0IS7mw"
+KEY = ""
 key = "&key=" + KEY
 
 
@@ -153,7 +153,6 @@ def getMeta(points, myloc,imLimit=0,start=0):
                 response = requests.get(link)
                 resJson = response.json()
 
-<<<<<<< HEAD
                 bearing = float(crop["b"])
                 # pt1 = (float(crop["x1"]), float(crop["y1"]))
                 # pt2 = (float(crop["x2"]), float(crop["y2"]))
@@ -182,23 +181,6 @@ def getMeta(points, myloc,imLimit=0,start=0):
                             # uniqueImageIDs.append(resJson["pano_id"])
                             # meta = resJson["date"] + resJson["pano_id"]
                             # getStreet(lat, lon, myloc, bearing, meta,idx)
-=======
-                if True:
-                    if resJson["pano_id"] not in uniqueImageIDs:
-                        # bearing = computeBearing(fro, pt1)
-                        # distance = computeDistance(fro, pt1)
-                        # print("Distance (m) ", distance)
-                        uniqueImageIDs.append(resJson["pano_id"])
-                        meta = resJson["date"] + resJson["pano_id"]
-                        getStreet(lat, lon, myloc, bearing, meta,idx)
-
-                        # bearing = computeBearing(fro, pt2)
-                        # distance = computeDistance(fro, pt2)
-                        # print("Distance (m) ", distance)
-                        # uniqueImageIDs.append(resJson["pano_id"])
-                        # meta = resJson["date"] + resJson["pano_id"]
-                        # getStreet(lat, lon, myloc, bearing, meta,idx)
->>>>>>> 2b81a7924c2b5e4dccb4d063a12a3983687082d7
         i += 1
 
 
