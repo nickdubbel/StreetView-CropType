@@ -10,7 +10,7 @@ EARTH_RADIUS = 6371e3  # in meters
 DISTANCE_DELTA = 0.0001  # used for interpolating points along the road
 PERPENDICULAR_DISTANCE = 3  # distance for calculating field points
 OVERPASS_API_URL = "http://overpass-api.de/api/interpreter"
-SHAPEFILE_PATH = 'TreehealthDataset/bomen.shp'
+SHAPEFILE_PATH = 'CreatingData/TreehealthDataset/bomen.shp'
 totaal_list = []
 
 def compute_bearing(from_point, to_point):
@@ -52,7 +52,7 @@ def process_shapefile(shapefile_path):
         conditie = geo_data.CONDITIE[geo_idx]
         if geo_idx >= 0:
             process_geometry(geometry, geo_idx,conditie)
-    save_to_csv(totaal_list, f"1200+ .csv", "y,x,b,oy,ox,type")
+    save_to_csv(totaal_list, f"test.csv", "y,x,b,oy,ox,type")
 
 def process_geometry(geometry, geo_idx,conditie):
     """Process a single geometry from the shapefile."""
