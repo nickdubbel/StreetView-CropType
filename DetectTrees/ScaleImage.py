@@ -1,6 +1,7 @@
 import os
 import cv2
 import numpy as np
+import sys
 
 def process_image(img):
     # Convert to grayscale (recommended)
@@ -64,9 +65,20 @@ def process_images_in_folder(input_folder, output_folder):
             process_images_in_folder(full_path, output_subfolder)
 
 # Input folder containing subfolders with images
-input_folder = "./DataBlack"
+# input_folder = "./DataBlack"
 # Output folder where processed images will be saved
-output_folder = "./ResizedTreeData"
+# output_folder = "./ResizedTreeData"
+
+if len(sys.argv) < 3:
+    print("Usage: python ScaleImage.py <input_folder> <output_folder>")
+    exit()
+input_folder = sys.argv[1]
+output_folder = sys.argv[2]
+
+# Check if input folder exists
+if not os.path.exists(input_folder):
+    print("Input folder does not exist")
+    exit()
 
 # Create output folder if it doesn't exist
 os.makedirs(output_folder, exist_ok=True)

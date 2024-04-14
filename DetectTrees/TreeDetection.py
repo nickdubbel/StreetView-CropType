@@ -4,6 +4,7 @@ import numpy as np
 import os
 import math
 from PIL import Image
+import sys
 
 class FindTree:
     def __init__(self, model, showAllTrees=False) -> None:
@@ -104,9 +105,24 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
 # Example usage
 if __name__ == "__main__":
 
-   
-    dataset_input_folder = "Data/drive-download-20240403T140634Z-001"
-    dataset_output_folder = "Data/drive_processed_singleTree"
+    
+    # dataset_input_folder = "Data/drive-download-20240403T140634Z-001"
+    # dataset_output_folder = "Data/drive_processed_singleTree"
+
+    if len(sys.argv) < 3:
+        print("Usage: python TreeDetection.py <input_folder> <output_folder>")
+        exit()
+    dataset_input_folder = sys.argv[1]
+    dataset_output_folder = sys.argv[2]
+
+    if not os.path.exists(dataset_input_folder):
+        print("Input folder does not exist")
+        exit()
+    
+    if not os.path.exists(dataset_output_folder):
+        os.makedirs(dataset_output_folder)
+
+    
 
     model = YOLO("DetectTrees/best.pt")
     ft = FindTree(model,showAllTrees=False)
