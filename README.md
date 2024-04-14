@@ -20,7 +20,12 @@ This project aims to classify tree types using street view images. It utilizes d
 
 1. Creating data:
 
-    ??????????????????
+    place the tree dataset (shape files) in creatingData/TreehealthDataset.
+    In road_points.py edit the name and the save location of the resulting csv file containing the location ,road and qualities of the trees.
+
+    modify the getGSVImages.py to grep the correct .csv file (the one just made) and run it for the 6 categories changing the save location between each category run.
+
+    
 
 1. Detect trees:
 
